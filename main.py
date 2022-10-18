@@ -3,10 +3,8 @@ from firebase_admin import auth,firestore,credentials
 from google.cloud.firestore_v1.document import DocumentReference
 from typing import List
 import csv
-cred = credentials.Certificate('cred.json')
-firebase = firebase_admin.initialize_app(cred)
+db = firestore.Client()
 def add_data_one(collection,data,doc_id=None):
-    db = firestore.Client()
     if doc_id==None:
         doc_ref = db.collection(collection).document()
         
@@ -14,6 +12,7 @@ def add_data_one(collection,data,doc_id=None):
         doc_ref = db.collection(collection).document(doc_id)
     doc_ref.set(data,merge=True)
     return doc_ref
+
 def updateByRef(docRef,data):
     docRef.set(data,merge=True)
     return docRef
@@ -55,9 +54,6 @@ def csv_students(path):
                     phone_number=phone_number,
                     enrollment=enrollment,
                 ))
-class Guardians:
-    display_name:str
-    phone_number:str
 
 class Student:
     display_name:str
@@ -71,11 +67,12 @@ class Student:
     tg:DocumentReference
     guardians:dict
     documentrefrence:DocumentReference
-    def create(self,display_name:str,email:str,phone_number:str,enrollment:str,guardians:dict,disabled:bool=False,email_verified:bool=True,password:str=None):
+    def create(self,display_name:str,email:str,phone_number:str,enrollment:str,guardians:dict={},disabled:bool=False,email_verified:bool=True,password:str=None):
         self.display_name=display_name
         self.email=email
         self.email_verified=email_verified
         self.phone_number=phone_number
+        self.enrollment=enrollment
         self.password=password if password !=None else enrollment[-3:]+phone_number[-3:] 
         print(self.password)
         self.disabled=disabled
@@ -131,7 +128,7 @@ class Class:
         self.student.append(stud)
         self.documentreference= updateByRef(self.documentreference,data={'student':self.student})
         return self
-csv_students('Untitled form.csv')
+
     
     
 
